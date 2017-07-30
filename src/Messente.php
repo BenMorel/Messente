@@ -156,7 +156,7 @@ class Messente
 
         $url = $this->getApiUrl(self::GET_DLR_RESPONSE_ENDPOINT);
 
-        $response = $this->client->post($url, [
+        $response = $this->client->get($url, [
             RequestOptions::QUERY => $parameters
         ]);
 
