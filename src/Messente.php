@@ -6,6 +6,8 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\RequestOptions;
 
+use Psr\Http\Message\ResponseInterface;
+
 /**
  * Sends SMS messages using the Messente API.
  */
@@ -121,19 +123,7 @@ class Messente
             RequestOptions::QUERY => $parameters
         ]);
 
-        $body = (string) $response->getBody();
-
-        if (preg_match('/^(OK|ERROR|FAILURE) (.+)$/', $body, $matches) !== 1) {
-            throw MessenteException::invalidResponse($body);
-        }
-
-        list ($code, $status, $value) = $matches;
-
-        if ($status === 'OK') {
-            return $value;
-        }
-
-        throw MessenteException::forCode($code);
+        return $this->getResponse($response);
     }
 
     /**
@@ -160,6 +150,18 @@ class Messente
             RequestOptions::QUERY => $parameters
         ]);
 
+        return $this->getResponse($response);
+    }
+
+    /**
+     * @param ResponseInterface $response
+     *
+     * @return string
+     *
+     * @throws MessenteException
+     */
+    private function getResponse(ResponseInterface $response) : string
+    {
         $body = (string) $response->getBody();
 
         if (preg_match('/^(OK|ERROR|FAILURE) (.+)$/', $body, $matches) !== 1) {
