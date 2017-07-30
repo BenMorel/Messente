@@ -1,0 +1,19 @@
+{
+  "name": "benmorel/messente",
+  "description": "Client library for the Messente SMS gateway",
+  "type": "library",
+  "keywords": [
+    "Messente",
+    "SMS"
+  ],
+  "license": "MIT",
+  "require": {
+    "php": ">=7",
+    "guzzlehttp/guzzle": "6.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Messente\\": "src/"
+    }
+  }
+}
