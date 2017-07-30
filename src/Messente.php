@@ -99,7 +99,8 @@ class Messente
      * @return string A unique MessageID, which is specific to this message.
      *                This MessageID can be used later to check the Delivery status.
      *
-     * @throws \RuntimeException
+     * @throws RequestException  If the HTTP request fails.
+     * @throws MessenteException If an error is received from the API.
      */
     public function send(string $text, string $to, string $from = null) : string
     {
@@ -116,27 +117,23 @@ class Messente
 
         $url = $this->getApiUrl(self::SEND_SMS_ENDPOINT);
 
-        try {
-            $response = $this->client->post($url, [
-                RequestOptions::QUERY => $parameters
-            ]);
-        } catch (RequestException $e) {
-            throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
-        }
+        $response = $this->client->post($url, [
+            RequestOptions::QUERY => $parameters
+        ]);
 
         $body = (string) $response->getBody();
 
-        if (preg_match('/^(OK|ERROR) (.+)$/', $body, $matches) !== 1) {
-            throw new \RuntimeException('Invalid response received: ' . $body);
+        if (preg_match('/^(OK|ERROR|FAILURE) (.+)$/', $body, $matches) !== 1) {
+            throw MessenteException::invalidResponse($body);
         }
 
-        list (, $status, $value) = $matches;
+        list ($code, $status, $value) = $matches;
 
-        if ($status === 'ERROR') {
-            throw new \RuntimeException('Error received from the API: ' . $value);
+        if ($status === 'OK') {
+            return $value;
         }
 
-        return $value;
+        throw MessenteException::forCode($code);
     }
 
     /**
@@ -145,6 +142,9 @@ class Messente
      * @param string $messageId The message ID returned by `send()`.
      *
      * @return string The message status: 'SENT', 'FAILED' or 'DELIVERED'.
+     *
+     * @throws RequestException  If the HTTP request fails.
+     * @throws MessenteException If an error is received from the API.
      */
     public function getStatus(string $messageId) : string
     {
@@ -156,26 +156,22 @@ class Messente
 
         $url = $this->getApiUrl(self::GET_DLR_RESPONSE_ENDPOINT);
 
-        try {
-            $response = $this->client->post($url, [
-                RequestOptions::QUERY => $parameters
-            ]);
-        } catch (RequestException $e) {
-            throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
-        }
+        $response = $this->client->post($url, [
+            RequestOptions::QUERY => $parameters
+        ]);
 
         $body = (string) $response->getBody();
 
-        if (preg_match('/^(OK|ERROR) (.+)$/', $body, $matches) !== 1) {
-            throw new \RuntimeException('Invalid response received: ' . $body);
+        if (preg_match('/^(OK|ERROR|FAILURE) (.+)$/', $body, $matches) !== 1) {
+            throw MessenteException::invalidResponse($body);
         }
 
-        list (, $status, $value) = $matches;
+        list ($code, $status, $value) = $matches;
 
-        if ($status === 'ERROR') {
-            throw new \RuntimeException('Error received from the API: ' . $value);
+        if ($status === 'OK') {
+            return $value;
         }
 
-        return $value;
+        throw MessenteException::forCode($code);
     }
 }
