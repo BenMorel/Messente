@@ -14,7 +14,8 @@ class Messente
     const PRIMARY_API = 'https://api2.messente.com';
     const BACKUP_API  = 'https://api3.messente.com';
 
-    const SEND_SMS_ENDPOINT = '/send_sms/';
+    const SEND_SMS_ENDPOINT         = '/send_sms/';
+    const GET_DLR_RESPONSE_ENDPOINT = '/get_dlr_response/';
 
     /**
      * The Guzzle HTTP client.
@@ -114,6 +115,46 @@ class Messente
         }
 
         $url = $this->getApiUrl(self::SEND_SMS_ENDPOINT);
+
+        try {
+            $response = $this->client->post($url, [
+                RequestOptions::QUERY => $parameters
+            ]);
+        } catch (RequestException $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        $body = (string) $response->getBody();
+
+        if (preg_match('/^(OK|ERROR) (.+)$/', $body, $matches) !== 1) {
+            throw new \RuntimeException('Invalid response received: ' . $body);
+        }
+
+        list (, $status, $value) = $matches;
+
+        if ($status === 'ERROR') {
+            throw new \RuntimeException('Error received from the API: ' . $value);
+        }
+
+        return $value;
+    }
+
+    /**
+     * Queries the status of a message.
+     *
+     * @param string $messageId The message ID returned by `send()`.
+     *
+     * @return string The message status: 'SENT', 'FAILED' or 'DELIVERED'.
+     */
+    public function getStatus(string $messageId) : string
+    {
+        $parameters = [
+            'username'      => $this->username,
+            'password'      => $this->password,
+            'sms_unique_id' => $messageId
+        ];
+
+        $url = $this->getApiUrl(self::GET_DLR_RESPONSE_ENDPOINT);
 
         try {
             $response = $this->client->post($url, [
