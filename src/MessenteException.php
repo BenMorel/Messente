@@ -53,11 +53,24 @@ class MessenteException extends \Exception
     ];
 
     /**
+     * @var string|null
+     */
+    private $errorCode;
+
+    /**
+     * @return string|null
+     */
+    public function getErrorCode()
+    {
+        return $this->errorCode;
+    }
+
+    /**
      * @param string $code The error code.
      *
      * @return MessenteException
      */
-    public static function forCode(string $code) : MessenteException
+    public static function forErrorCode(string $code) : MessenteException
     {
         if (isset(self::ERROR_MESSAGES[$code])) {
             $message = self::ERROR_MESSAGES[$code];
@@ -65,7 +78,10 @@ class MessenteException extends \Exception
             $message = 'Unknown Messente API error';
         }
 
-        return new self($message, $code);
+        $exception = new self($message);
+        $exception->errorCode = $code;
+
+        return $exception;
     }
 
     /**

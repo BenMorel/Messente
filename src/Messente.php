@@ -174,6 +174,6 @@ class Messente
             return $value;
         }
 
-        throw MessenteException::forCode($code);
+        throw MessenteException::forErrorCode($code);
     }
 }
