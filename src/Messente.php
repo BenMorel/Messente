@@ -110,7 +110,7 @@ class Messente
             'username' => $this->username,
             'password' => $this->password,
             'text'     => $text,
-            'to'       => $to
+            'to'       => $this->normalizeNumber($to)
         ];
 
         if ($from !== null) {
@@ -175,5 +175,15 @@ class Messente
         }
 
         throw MessenteException::forErrorCode($code);
+    }
+
+    /**
+     * @param string $number
+     *
+     * @return string
+     */
+    private function normalizeNumber($number)
+    {
+        return preg_filter('/\D/', '', $number);
     }
 }
