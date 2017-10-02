@@ -70,7 +70,7 @@ class Messente
      *
      * @return void
      */
-    public function setUseBackupApi(bool $useBackupApi)
+    public function setUseBackupApi(bool $useBackupApi) : void
     {
         $this->useBackupApi = $useBackupApi;
     }

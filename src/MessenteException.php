@@ -60,7 +60,7 @@ class MessenteException extends \Exception
     /**
      * @return string|null
      */
-    public function getErrorCode()
+    public function getErrorCode() : ?string
     {
         return $this->errorCode;
     }
