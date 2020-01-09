@@ -106,7 +106,7 @@ class Messente
      * @throws RequestException  If the HTTP request fails.
      * @throws MessenteException If an error is received from the API.
      */
-    public function send(string $text, string $to, string $from = null) : string
+    public function send(string $text, string $to, ?string $from = null) : string
     {
         $parameters = [
             'username' => $this->username,
